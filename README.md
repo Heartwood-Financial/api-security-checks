@@ -44,12 +44,89 @@ The Markdown report includes:
 - per-endpoint anonymous / wrong-audience / valid-token results
 - exemption marking for paths such as health endpoints
 
-## Usage
+## Quick Start
 
-Install in editable mode:
+For this repo, the easiest operator flow is:
+
+1. Create a local `.env` from `.env.example`.
+2. Make sure Azure CLI is signed in to the expected tenant and subscription.
+3. Run `./scripts/run-heartwood-scan.sh`.
+
+The runner script will:
+
+- load `.env`
+- verify Azure CLI login context
+- create `.venv` if needed
+- install the package in editable mode if needed
+- run the scanner with your local defaults
+
+On a fresh clone:
 
 ```bash
+cp .env.example .env
+./scripts/run-heartwood-scan.sh
+```
+
+## Local Setup
+
+Install manually if you want direct CLI access:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 python3 -m pip install -e .
+```
+
+Before running scans, Azure CLI needs to be authenticated:
+
+```bash
+az login
+az account show -o table
+```
+
+If you need to switch subscriptions:
+
+```bash
+az account set --subscription "<subscription-name-or-id>"
+```
+
+## .env Setup
+
+`.env` is local-only and ignored by git. The committed template is `.env.example`.
+
+The scanner and runner understand these operator defaults:
+
+- `API_SECURITY_CHECKS_CONFIG`: manifest path
+- `API_SECURITY_CHECKS_OUTPUT_DIR`: report directory
+- `API_SECURITY_CHECKS_SURFACES`: optional comma-separated surface filter
+- `API_SECURITY_CHECKS_REQUIRED_AZURE_TENANT_ID`: fail fast if `az` is on the wrong tenant
+- `API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_ID`: fail fast if `az` is on the wrong subscription
+- `API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_NAME`: friendly label used in preflight messages
+- `API_SECURITY_CHECKS_WRONG_AUDIENCE_TOKEN_COMMAND`: optional override for the wrong-audience probe command
+
+Example:
+
+```dotenv
+API_SECURITY_CHECKS_CONFIG=config/heartwood.toml
+API_SECURITY_CHECKS_OUTPUT_DIR=output/latest
+API_SECURITY_CHECKS_SURFACES=
+API_SECURITY_CHECKS_REQUIRED_AZURE_TENANT_ID=<tenant-id>
+API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_ID=<subscription-id>
+API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_NAME="<subscription-name>"
+```
+
+## Usage
+
+Run with the local `.env` defaults:
+
+```bash
+./scripts/run-heartwood-scan.sh
+```
+
+Run the CLI directly:
+
+```bash
+api-security-checks
 ```
 
 Run the default Heartwood scan:
@@ -73,6 +150,12 @@ api-security-checks \
   --surface helpdesk-prod-raw-cac
 ```
 
+Load a non-default env file:
+
+```bash
+api-security-checks --env-file .env.prod-check
+```
+
 ## Configuration
 
 The scanner is manifest-driven. The included `config/heartwood.toml` shows the pattern:
@@ -92,6 +175,8 @@ Each surface defines:
 - optional token resolution mode
 
 When `valid_token_mode = "appsetting"`, the scanner reads `AUTH_ALLOWED_AUDIENCES` from the target Function App and tries to mint a matching access token through `az account get-access-token`.
+
+The CLI auto-loads `./.env` when present. Command-line arguments still win if you pass explicit flags.
 
 ## Methodology Notes
 

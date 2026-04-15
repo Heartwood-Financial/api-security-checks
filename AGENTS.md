@@ -11,7 +11,9 @@
 
 ## Local Setup
 
-- `python3 -m venv .venv && source .venv/bin/activate` (optional)
+- Preferred operator path: `./scripts/run-heartwood-scan.sh`
+- Local defaults live in `.env` and the committed template is `.env.example`
+- `python3 -m venv .venv && source .venv/bin/activate` (optional for direct CLI use)
 - `python3 -m pip install -e .`
 - Azure CLI must already be authenticated to the target tenant/subscription
 
@@ -19,6 +21,7 @@
 
 - `python3 -m unittest discover -s tests -v`
 - `python3 -m api_security_checks.cli --config config/heartwood.toml --output-dir output/dev`
+- `./scripts/run-heartwood-scan.sh`
 
 ## Key Directories
 
@@ -38,7 +41,8 @@
 1. Keep the scanner non-destructive.
 2. Prefer live Azure discovery over repo-doc assumptions.
 3. Preserve report readability over clever output formats.
-4. Update docs when the methodology or risk classification changes.
+4. Keep `.env` local and do not commit operator-specific values.
+5. Update docs when the methodology or risk classification changes.
 
 ## Definition Of Done
 

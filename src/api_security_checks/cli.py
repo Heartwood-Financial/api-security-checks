@@ -1,33 +1,74 @@
 from __future__ import annotations
 
 import argparse
+import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 from . import azure
 from .config import load_manifest
+from .envfile import load_env_file
 from .discovery import discover_surface_endpoints
 from .models import EndpointReport, SurfaceReport, to_plain_dict
 from .probing import build_probe_profiles, probe_endpoint
 from .report import is_exempt, render_markdown, write_inventory, write_json_report, write_markdown_report
 
 
+def _split_surface_list(raw: str | None) -> list[str]:
+    if not raw:
+        return []
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+def _detect_env_file(argv: list[str]) -> Path | None:
+    for index, arg in enumerate(argv):
+        if arg == "--env-file" and index + 1 < len(argv):
+            return Path(argv[index + 1])
+        if arg.startswith("--env-file="):
+            return Path(arg.split("=", 1)[1])
+
+    configured = os.environ.get("API_SECURITY_CHECKS_ENV_FILE")
+    if configured:
+        return Path(configured)
+
+    default = Path(".env")
+    if default.is_file():
+        return default
+    return None
+
+
+def _preload_env(argv: list[str]) -> Path | None:
+    env_file = _detect_env_file(argv)
+    if env_file is None:
+        return None
+    if not env_file.is_file():
+        raise SystemExit(f"Env file not found: {env_file}")
+    load_env_file(env_file)
+    return env_file
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Discover and probe Azure API surfaces.")
     parser.add_argument(
+        "--env-file",
+        default=os.environ.get("API_SECURITY_CHECKS_ENV_FILE"),
+        help="Load defaults from a .env file. Defaults to ./.env when present.",
+    )
+    parser.add_argument(
         "--config",
-        default="config/heartwood.toml",
+        default=os.environ.get("API_SECURITY_CHECKS_CONFIG", "config/heartwood.toml"),
         help="Path to the TOML manifest that defines scanned surfaces.",
     )
     parser.add_argument(
         "--output-dir",
-        default=None,
+        default=os.environ.get("API_SECURITY_CHECKS_OUTPUT_DIR"),
         help="Directory for generated reports. Defaults to output/<timestamp>.",
     )
     parser.add_argument(
         "--surface",
         action="append",
-        default=[],
+        default=_split_surface_list(os.environ.get("API_SECURITY_CHECKS_SURFACES")),
         help="Optional surface name filter. Repeat to include multiple surfaces.",
     )
     return parser
@@ -38,9 +79,11 @@ def _default_output_dir() -> Path:
     return Path("output") / stamp
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    raw_argv = list(sys.argv[1:] if argv is None else argv)
+    _preload_env(raw_argv)
     parser = build_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(raw_argv)
 
     manifest = load_manifest(args.config)
     selected = {name for name in args.surface}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import tomllib
 from pathlib import Path
 
@@ -14,13 +15,32 @@ def load_manifest(path: str | Path) -> Manifest:
     frontdoor_block = data.get("frontdoor_defaults")
     surface_blocks = data.get("surfaces", [])
 
+    exempt_path_patterns = list(scan_block.get("exempt_path_patterns", []))
+    exempt_override = os.environ.get("API_SECURITY_CHECKS_EXEMPT_PATH_PATTERNS")
+    if exempt_override:
+        exempt_path_patterns = [item.strip() for item in exempt_override.split(",") if item.strip()]
+
     scan = ScanSettings(
-        title=scan_block.get("title", "API Security Checks"),
-        wrong_audience_token_command=scan_block["wrong_audience_token_command"],
-        exempt_path_patterns=list(scan_block.get("exempt_path_patterns", [])),
-        request_timeout_seconds=int(scan_block.get("request_timeout_seconds", 20)),
-        placeholder_uuid=scan_block.get("placeholder_uuid", "00000000-0000-0000-0000-000000000000"),
-        malformed_json_body=scan_block.get("malformed_json_body", '{"probe":'),
+        title=os.environ.get("API_SECURITY_CHECKS_TITLE", scan_block.get("title", "API Security Checks")),
+        wrong_audience_token_command=os.environ.get(
+            "API_SECURITY_CHECKS_WRONG_AUDIENCE_TOKEN_COMMAND",
+            scan_block["wrong_audience_token_command"],
+        ),
+        exempt_path_patterns=exempt_path_patterns,
+        request_timeout_seconds=int(
+            os.environ.get(
+                "API_SECURITY_CHECKS_REQUEST_TIMEOUT_SECONDS",
+                scan_block.get("request_timeout_seconds", 20),
+            )
+        ),
+        placeholder_uuid=os.environ.get(
+            "API_SECURITY_CHECKS_PLACEHOLDER_UUID",
+            scan_block.get("placeholder_uuid", "00000000-0000-0000-0000-000000000000"),
+        ),
+        malformed_json_body=os.environ.get(
+            "API_SECURITY_CHECKS_MALFORMED_JSON_BODY",
+            scan_block.get("malformed_json_body", '{"probe":'),
+        ),
     )
 
     frontdoor_defaults = None
