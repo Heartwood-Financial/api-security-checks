@@ -1,0 +1,320 @@
+[scan]
+title = "Heartwood API Security Checks"
+wrong_audience_token_command = "az account get-access-token --resource-type ms-graph --query accessToken -o tsv"
+request_timeout_seconds = 20
+exempt_path_patterns = [
+  "/api/*/health",
+  "/ops/health/*"
+]
+
+[frontdoor_defaults]
+resource_group = "rg-shared-prod-cac"
+profile_name = "afd-rtip-prod"
+endpoint_name = "hw-api-internal-prod"
+base_url = "https://api.internal.heartwoodfinancial.ca"
+
+[[surfaces]]
+name = "background-check-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-broker-check-api-dev-cae"
+base_url = "https://func-broker-check-api-dev-cae-e6awcrfhdch3g7aq.canadaeast-01.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "link-lender-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-link-lender-api-dev-cae"
+base_url = "https://func-link-lender-api-dev-cae-hvaueyb7eea5cegq.canadaeast-01.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "helpdesk-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-helpdesk-api-dev-cae"
+base_url = "https://func-helpdesk-api-dev-cae.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "mortgage-automator-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-mortgage-automator-api-dev-cae"
+base_url = "https://func-mortgage-automator-api-dev-cae.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "mortgage-automator-tool-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-mortgage-automator-tool-api-dev-cae"
+base_url = "https://func-mortgage-automator-tool-api-dev-cae.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "rtip-ma-worker-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-rtip-ma-worker-dev-cae"
+base_url = "https://func-rtip-ma-worker-dev-cae.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "ma-orchestrator-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-rtip-api-dev-cae"
+function_app = "func-rtip-orch-dev"
+base_url = "https://func-rtip-orch-dev-e7g7ghhgg4gba2bx.canadaeast-01.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "hubspot-sync-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-rtip-hubspot-worker-dev-cae"
+base_url = "https://func-rtip-hubspot-worker-dev-cae.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "mcap-import-dev-direct"
+environment = "dev"
+kind = "direct"
+resource_group = "rg-tools-api-dev-cae"
+function_app = "func-rtip-mcap-worker-dev-cae"
+base_url = "https://func-rtip-mcap-worker-dev-cae.azurewebsites.net"
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "background-check-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-broker-check-api-prod-cac"
+route_names = ["route-broker-check-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "link-lender-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-link-lender-api-prod-cac"
+route_names = ["route-link-lender-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "helpdesk-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-helpdesk-api-prod-cac"
+route_names = ["route-helpdesk-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "mortgage-automator-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-mortgage-automator-api-prod-cac"
+route_names = ["route-mortgage-automator-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "mortgage-automator-tool-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-mortgage-automator-tool-api-prod-cac"
+route_names = ["route-mortgage-automator-tool-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "rtip-ma-worker-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-rtip-ma-worker-prod-cac"
+route_names = ["route-rtip-ma-worker-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "ma-orchestrator-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-shared-prod-cac"
+function_app = "func-rtip-orch-prod-cac"
+route_names = ["route-ma-orchestrator-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "mcap-orchestrator-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-shared-prod-cac"
+function_app = "func-rtip-orch-prod-cac"
+route_names = ["route-mcap-orchestrator-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "hubspot-sync-prod-frontdoor"
+environment = "prod"
+kind = "frontdoor"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-rtip-hubspot-worker-prod-cac"
+route_names = ["route-hubspot-sync-api-prod"]
+valid_token_mode = "appsetting"
+
+[[surfaces]]
+name = "background-check-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-broker-check-api-prod-cac"
+base_url = "https://func-broker-check-api-prod-cac-g5f3hme0acd3dwgy.canadacentral-01.azurewebsites.net"
+
+[[surfaces]]
+name = "background-check-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-broker-check-api-prod-cae"
+base_url = "https://func-broker-check-api-prod-cae-fpgfdzgwf3dzhbas.canadaeast-01.azurewebsites.net"
+
+[[surfaces]]
+name = "link-lender-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-link-lender-api-prod-cac"
+base_url = "https://func-link-lender-api-prod-cac-dcdphfhzaxbxehaz.canadacentral-01.azurewebsites.net"
+
+[[surfaces]]
+name = "link-lender-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-link-lender-api-prod-cae"
+base_url = "https://func-link-lender-api-prod-cae-hmh5etcrc7a8gba5.canadaeast-01.azurewebsites.net"
+
+[[surfaces]]
+name = "helpdesk-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-helpdesk-api-prod-cac"
+base_url = "https://func-helpdesk-api-prod-cac.azurewebsites.net"
+
+[[surfaces]]
+name = "helpdesk-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-helpdesk-api-prod-cae"
+base_url = "https://func-helpdesk-api-prod-cae.azurewebsites.net"
+
+[[surfaces]]
+name = "mortgage-automator-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-mortgage-automator-api-prod-cac"
+base_url = "https://func-mortgage-automator-api-prod-cac.azurewebsites.net"
+
+[[surfaces]]
+name = "mortgage-automator-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-mortgage-automator-api-prod-cae"
+base_url = "https://func-mortgage-automator-api-prod-cae.azurewebsites.net"
+
+[[surfaces]]
+name = "mortgage-automator-tool-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-mortgage-automator-tool-api-prod-cac"
+base_url = "https://func-mortgage-automator-tool-api-prod-cac.azurewebsites.net"
+
+[[surfaces]]
+name = "mortgage-automator-tool-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-mortgage-automator-tool-api-prod-cae"
+base_url = "https://func-mortgage-automator-tool-api-prod-cae.azurewebsites.net"
+
+[[surfaces]]
+name = "rtip-ma-worker-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-rtip-ma-worker-prod-cac"
+base_url = "https://func-rtip-ma-worker-prod-cac.azurewebsites.net"
+
+[[surfaces]]
+name = "rtip-ma-worker-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-rtip-ma-worker-prod-cae"
+base_url = "https://func-rtip-ma-worker-prod-cae.azurewebsites.net"
+
+[[surfaces]]
+name = "ma-orchestrator-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-shared-prod-cac"
+function_app = "func-rtip-orch-prod-cac"
+base_url = "https://func-rtip-orch-prod-cac.azurewebsites.net"
+
+[[surfaces]]
+name = "ma-orchestrator-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-shared-prod-cae"
+function_app = "func-rtip-orch-prod-cae"
+base_url = "https://func-rtip-orch-prod-cae.azurewebsites.net"
+
+[[surfaces]]
+name = "hubspot-sync-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-rtip-hubspot-worker-prod-cac"
+base_url = "https://func-rtip-hubspot-worker-prod-cac.azurewebsites.net"
+
+[[surfaces]]
+name = "hubspot-sync-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-rtip-hubspot-worker-prod-cae"
+base_url = "https://func-rtip-hubspot-worker-prod-cae.azurewebsites.net"
+
+[[surfaces]]
+name = "mcap-import-prod-raw-cac"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cac"
+function_app = "func-rtip-mcap-worker-prod-cac"
+base_url = "https://func-rtip-mcap-worker-prod-cac.azurewebsites.net"
+
+[[surfaces]]
+name = "mcap-import-prod-raw-cae"
+environment = "prod"
+kind = "direct"
+resource_group = "rg-tools-api-prod-cae"
+function_app = "func-rtip-mcap-worker-prod-cae"
+base_url = "https://func-rtip-mcap-worker-prod-cae.azurewebsites.net"
