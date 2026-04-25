@@ -8,6 +8,56 @@ from .matching import matches_any_pattern, path_from_url, render_probe_path
 from .models import Endpoint, FrontDoorDefaults, SurfaceConfig
 
 
+def infer_environment(resource_group: str, function_app: str) -> str:
+    haystack = f"{resource_group} {function_app}".lower()
+    for environment in ("prod", "dev", "uat", "sit", "test", "qa"):
+        if f"-{environment}-" in haystack or haystack.endswith(f"-{environment}") or f"_{environment}_" in haystack:
+            return environment
+    return "unknown"
+
+
+def discover_direct_functionapp_surfaces(
+    existing_surfaces: list[SurfaceConfig],
+    states: set[str],
+) -> list[SurfaceConfig]:
+    existing_direct = {
+        (surface.resource_group.lower(), surface.function_app.lower())
+        for surface in existing_surfaces
+        if surface.kind == "direct"
+    }
+    discovered: list[SurfaceConfig] = []
+
+    for app in azure.list_function_apps():
+        state = str(app.get("state") or "")
+        if states and state not in states:
+            continue
+
+        name = str(app.get("name") or "")
+        resource_group = str(app.get("resourceGroup") or "")
+        default_host_name = str(app.get("defaultHostName") or "")
+        if not name or not resource_group or not default_host_name:
+            continue
+
+        key = (resource_group.lower(), name.lower())
+        if key in existing_direct:
+            continue
+
+        discovered.append(
+            SurfaceConfig(
+                name=f"direct-{name}",
+                environment=infer_environment(resource_group, name),
+                kind="direct",
+                resource_group=resource_group,
+                function_app=name,
+                base_url=f"https://{default_host_name}",
+                notes="Auto-discovered direct Function App surface from Azure subscription inventory.",
+                valid_token_mode="appsetting",
+            )
+        )
+
+    return sorted(discovered, key=lambda surface: (surface.environment, surface.resource_group, surface.function_app))
+
+
 def _http_bindings(function_payload: dict[str, Any]) -> list[dict[str, Any]]:
     bindings = ((function_payload.get("config") or {}).get("bindings") or [])
     return [binding for binding in bindings if binding.get("type") == "httpTrigger"]

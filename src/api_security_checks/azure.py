@@ -30,6 +30,21 @@ def run_az_tsv(args: list[str]) -> str:
 
 
 @lru_cache(maxsize=None)
+def list_function_apps() -> list[dict[str, Any]]:
+    return list(
+        run_az_json(
+            [
+                "functionapp",
+                "list",
+                "--query",
+                "[].{name:name,resourceGroup:resourceGroup,defaultHostName:defaultHostName,state:state,kind:kind}",
+            ]
+        )
+        or []
+    )
+
+
+@lru_cache(maxsize=None)
 def list_functions(resource_group: str, function_app: str) -> list[dict[str, Any]]:
     return list(run_az_json(["functionapp", "function", "list", "-g", resource_group, "-n", function_app]) or [])
 

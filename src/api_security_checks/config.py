@@ -41,6 +41,12 @@ def load_manifest(path: str | Path) -> Manifest:
             "API_SECURITY_CHECKS_MALFORMED_JSON_BODY",
             scan_block.get("malformed_json_body", '{"probe":'),
         ),
+        capture_response_excerpt_bytes=int(
+            os.environ.get(
+                "API_SECURITY_CHECKS_CAPTURE_RESPONSE_EXCERPT_BYTES",
+                scan_block.get("capture_response_excerpt_bytes", 0),
+            )
+        ),
     )
 
     frontdoor_defaults = None

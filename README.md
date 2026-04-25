@@ -26,6 +26,7 @@ The scanner is designed to avoid state changes:
 - `POST`, `PUT`, `PATCH`, and `DELETE` endpoints are probed with their declared method but a deliberately malformed JSON body.
 - The malformed body is intended to exercise auth gates before business validation and avoid successful writes.
 - Path placeholders are replaced with harmless probe values such as all-zero UUIDs or `security-check`.
+- Response body capture is disabled by default; reports classify by status code unless you explicitly enable excerpts.
 
 That still does **not** make the scan a proof of zero risk. Endpoints that require real identifiers may still return `404`, and services that authenticate after request parsing can show `400` or `415`, which the tool flags as a potential auth-gate weakness.
 
@@ -99,6 +100,10 @@ The scanner and runner understand these operator defaults:
 - `API_SECURITY_CHECKS_CONFIG`: manifest path
 - `API_SECURITY_CHECKS_OUTPUT_DIR`: report directory
 - `API_SECURITY_CHECKS_SURFACES`: optional comma-separated surface filter
+- `API_SECURITY_CHECKS_DISCOVER_DIRECT_FUNCTIONAPPS`: set to `1` to add live direct Function App hosts from Azure inventory
+- `API_SECURITY_CHECKS_DIRECT_DISCOVERY_ONLY`: set to `1` to scan only auto-discovered direct Function App hosts
+- `API_SECURITY_CHECKS_DIRECT_DISCOVERY_STATES`: comma-separated Function App states to include, defaults to `Running`
+- `API_SECURITY_CHECKS_SKIP_VALID_TOKEN`: set to `1` to focus on anonymous and wrong-audience probes only
 - `API_SECURITY_CHECKS_REQUIRED_AZURE_TENANT_ID`: fail fast if `az` is on the wrong tenant
 - `API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_ID`: fail fast if `az` is on the wrong subscription
 - `API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_NAME`: friendly label used in preflight messages
@@ -110,6 +115,10 @@ Example:
 API_SECURITY_CHECKS_CONFIG=config/heartwood.toml
 API_SECURITY_CHECKS_OUTPUT_DIR=output/latest
 API_SECURITY_CHECKS_SURFACES=
+API_SECURITY_CHECKS_DISCOVER_DIRECT_FUNCTIONAPPS=0
+API_SECURITY_CHECKS_DIRECT_DISCOVERY_ONLY=0
+API_SECURITY_CHECKS_DIRECT_DISCOVERY_STATES=Running
+API_SECURITY_CHECKS_SKIP_VALID_TOKEN=0
 API_SECURITY_CHECKS_REQUIRED_AZURE_TENANT_ID=<tenant-id>
 API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_ID=<subscription-id>
 API_SECURITY_CHECKS_REQUIRED_AZURE_SUBSCRIPTION_NAME="<subscription-name>"
@@ -154,6 +163,16 @@ Load a non-default env file:
 
 ```bash
 api-security-checks --env-file .env.prod-check
+```
+
+Scan all running Function Apps directly from the current Azure subscription:
+
+```bash
+api-security-checks \
+  --discover-direct-functionapps \
+  --direct-discovery-only \
+  --skip-valid-token \
+  --output-dir output/direct-latest
 ```
 
 ## Configuration

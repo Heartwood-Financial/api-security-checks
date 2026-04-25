@@ -82,6 +82,12 @@ def _classify(status_code: int | None, endpoint: Endpoint, profile: ProbeProfile
     return "other"
 
 
+def _read_excerpt(response, scan: ScanSettings) -> str | None:
+    if scan.capture_response_excerpt_bytes <= 0:
+        return None
+    return response.read(scan.capture_response_excerpt_bytes).decode("utf-8", errors="replace").strip() or None
+
+
 def probe_endpoint(endpoint: Endpoint, scan: ScanSettings, profile: ProbeProfile) -> ProbeResult:
     headers = {
         "User-Agent": "api-security-checks/0.1.0",
@@ -114,10 +120,10 @@ def probe_endpoint(endpoint: Endpoint, scan: ScanSettings, profile: ProbeProfile
     try:
         with urllib.request.urlopen(request, timeout=scan.request_timeout_seconds) as response:
             status_code = response.getcode()
-            excerpt = response.read(200).decode("utf-8", errors="replace")
+            excerpt = _read_excerpt(response, scan)
     except urllib.error.HTTPError as exc:
         status_code = exc.code
-        excerpt = exc.read(200).decode("utf-8", errors="replace")
+        excerpt = _read_excerpt(exc, scan)
     except Exception as exc:  # pragma: no cover - network/runtime dependent
         return ProbeResult(
             profile=profile.name,
@@ -130,5 +136,5 @@ def probe_endpoint(endpoint: Endpoint, scan: ScanSettings, profile: ProbeProfile
         profile=profile.name,
         status_code=status_code,
         category=_classify(status_code, endpoint, profile),
-        response_excerpt=excerpt.strip() or None,
+        response_excerpt=excerpt,
     )

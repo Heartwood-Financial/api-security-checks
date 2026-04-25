@@ -22,6 +22,7 @@
 - `python3 -m unittest discover -s tests -v`
 - `python3 -m api_security_checks.cli --config config/heartwood.toml --output-dir output/dev`
 - `./scripts/run-heartwood-scan.sh`
+- Direct tenant-origin scan: `./scripts/run-heartwood-scan.sh --discover-direct-functionapps --direct-discovery-only --skip-valid-token --output-dir output/direct-latest`
 
 ## Key Directories
 

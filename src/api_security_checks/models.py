@@ -20,6 +20,7 @@ class ScanSettings:
     request_timeout_seconds: int = 20
     placeholder_uuid: str = "00000000-0000-0000-0000-000000000000"
     malformed_json_body: str = '{"probe":'
+    capture_response_excerpt_bytes: int = 0
 
 
 @dataclass(slots=True)
